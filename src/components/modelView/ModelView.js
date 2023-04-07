@@ -1,92 +1,68 @@
 import React from 'react';
 import './ModelView.css';
-import { Table, Accordion } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function ModelView(props) {
-    const renderModelPermissions = () => {
-        return (
-            <>
-                <div className='padding-top-8'></div>
-                <h5>Model permissions</h5>
+    const modelPermissions =  Object.entries(props.model.permissions);
+    const fieldEntries =  Object.entries(props.model.fields);
+    const fieldRows = Object.values(props.model.fields).reduce((acc, field) => {
+        acc += Object.values(field.permissions).length;
+        return acc;
+    }, 0);
 
-                <div className='padding-top-8'>
-                    <Table bordered hover>
-                        <thead>
-                            <tr>
-                                <th>Action type</th>
-                                <th>Source class</th>
-                                <th>Type</th>
-                                <th>Required name</th>
-                                <th>Required expr</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {(() => {
-                                let rows = [];
-                                for(const [key, value] of Object.entries(props.model.permissions)) {
-                                    rows.push(
-                                        <tr>
-                                            <td>{key}</td>
-                                            <td>{value.source.class}</td>
-                                            <td>{value.type}</td>
-                                            <td>{value.required.name}</td>
-                                            <td>{value.required.expr}</td>
-                                        </tr>
-                                    );
-                                }
-                                return rows;
-                            })()}
-                        </tbody>
-                    </Table>
-                </div>
-            </>
-        );
-    }
+    const numberOfRows = modelPermissions.length + fieldRows;
+    let model = [];
+    // model name, source class, type of permission(model/field), field name, actionType, source class, type, required name, required expr 
 
-    const renderFieldPermissions = () => {
-        return (
-            <>
-                <div className='padding-top-8'></div>
-                <h5>Field permissions</h5>
-
-                <Accordion>
-                    <Accordion.Item eventKey="0">
-                        <Accordion.Header>Field Item #1</Accordion.Header>
-                        <Accordion.Body>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-                        minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                        aliquip ex ea commodo consequat. Duis aute irure dolor in
-                        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-                        culpa qui officia deserunt mollit anim id est laborum.
-                        </Accordion.Body>
-                    </Accordion.Item>
-                    <Accordion.Item eventKey="1">
-                        <Accordion.Header>Field Item #2</Accordion.Header>
-                        <Accordion.Body>
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                        eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-                        minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-                        aliquip ex ea commodo consequat. Duis aute irure dolor in
-                        reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                        pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-                        culpa qui officia deserunt mollit anim id est laborum.
-                        </Accordion.Body>
-                    </Accordion.Item>
-                </Accordion>
-            </>
-        );
-    }
-
+    // rowspan would be applied on "type of permission" and "model name", field name
     return (
-        <div className='modelview-container'>
-            The source class is <b>{props.model.source.class}</b>
-            {renderModelPermissions()}
-            {renderFieldPermissions()}
-        </div>
-        
+        <>
+            {
+                (() => {
+                    for(let i=0; i<modelPermissions.length; i++) {
+                        model.push(
+                            <tr>
+                                {i===0 && <td rowSpan={numberOfRows}>{props.model.name}</td>}
+                                {i===0 && <td rowSpan={numberOfRows}>{props.model.source.class}</td>}
+                                {i===0 && <td rowSpan={modelPermissions.length}>Model</td>}
+                                <td>N/A</td>
+                                <td>{modelPermissions[i][0]}</td>
+                                <td>{modelPermissions[i][1].source.class}</td>
+                                <td>{modelPermissions[i][1].type}</td>
+                                <td>{modelPermissions[i][1].required.name}</td>
+                                <td>{modelPermissions[i][1].required.expr}</td>
+                            </tr>
+                        )
+                    }
+
+                    // for every field, we run a loop for permissions
+                    for(let i=0; i<fieldEntries.length; i++) {
+                        const fieldPermissions = Object.entries(fieldEntries[i][1].permissions);
+                        
+                        for (let j=0; j<fieldPermissions.length; j++) {
+                            model.push(
+                                <tr class="success">
+                                    {i===0 && j===0 && <td rowSpan={fieldRows}>Field</td>}
+
+                                    {/* field name at the start of field permissions chunk */}
+                                    {j===0 && <td rowSpan={fieldPermissions.length}>{fieldEntries[i][0]}</td>}
+
+                                    {/* field permission name for every row */}
+                                    <td>{fieldPermissions[j][0]}</td>
+                                    <td>{fieldPermissions[j][1].source.class}</td>
+                                    <td>{fieldPermissions[j][1].type}</td>
+                                    <td>{fieldPermissions[j][1].required.name}</td>
+                                    <td>{fieldPermissions[j][1].required.expr}</td>
+                                </tr>
+                            )
+                        }
+                        
+                    }
+
+                    return model;
+                })()
+            }
+        </>
       );
 }
 
