@@ -13,4 +13,10 @@
   color: white;
 }
 
-.tableFixHead thead th { position: sticky; top: 0; z-index: 1; background-color: purple; color: white; }
+.tableFixHead thead th { 
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background-color: purple;
+  color: white;
+}
